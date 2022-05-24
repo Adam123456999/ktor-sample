@@ -11,6 +11,7 @@ fun Application.configureHTTP() {
     allowHeader(HttpHeaders.ContentType)
     allowHeader(HttpHeaders.AccessControlAllowOrigin)
     allowHeader(HttpHeaders.Authorization)
-    allowHost("examplehost:8080", schemes = listOf("https"))
+//    allowHost("examplehost:8080", schemes = listOf("https"))
+    anyHost()
   }
 }
