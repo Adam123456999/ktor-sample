@@ -11,27 +11,7 @@ object DatabaseConnection {
 
   fun getAllUsers(): MutableList<UserModel> = Json.decodeFromString(usersFile.readText())
 
-  fun getUserByID(id: String): UserModel? = getAllUsers().find { it.id == id }
-
-  fun addUser(userModel: UserModel) {
-    val list = getAllUsers()
-    list.add(userModel)
-    usersFile.writeText(Json.encodeToString(list))
-  }
-
-  fun patchUserAtID(userModel: UserModel, id: String) {}
-
-  fun deleteAllUsers() {
-    val list = getAllUsers()
-    list.clear()
-    usersFile.writeText(Json.encodeToString(list))
-  }
-
-  fun deleteUserAtID(id: String) {
-    val list = getAllUsers()
-    list.removeIf { it.id == id }
-    usersFile.writeText(Json.encodeToString(list))
-  }
+  fun postAll(list: MutableList<UserModel>) = usersFile.writeText(Json.encodeToString(list))
 
   fun generateRandomID(): String {
     val charPool : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
