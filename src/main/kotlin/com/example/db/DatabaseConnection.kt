@@ -1,74 +1,37 @@
 package com.example.db
 
 import com.example.models.UserModel
-import com.example.entities.UserEntity
-import org.ktorm.database.Database
-import org.ktorm.dsl.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.io.File
 
 object DatabaseConnection {
-  private val db = Database.connect(
-    url = "jdbc:mysql://localhost:3306/base_schema",
-    driver = "com.mysql.cj.jdbc.Driver",
-    user = "root",
-    password = "ConDor342"
-  )
+  private val usersFile = File("src/main/kotlin/com/example/db/Database.json")
 
-  fun getAllUsers(): List<UserModel> {
-    val users = db.from(UserEntity).select()
-      .map { user ->
-        val id = user[UserEntity.id]
-        val name = user[UserEntity.name]
-        val password = user[UserEntity.password]
-        UserModel(id, name, password)
-      }
-    return users
+  fun getAllUsers(): MutableList<UserModel> = Json.decodeFromString(usersFile.readText())
+
+  fun getUserByID(id: String): UserModel? = getAllUsers().find { it.id == id }
+
+  fun addUser(userModel: UserModel) {
+    val list = getAllUsers()
+    list.add(userModel)
+    usersFile.writeText(Json.encodeToString(list))
   }
 
-  fun getUserByID(id: String): UserModel? {
-    val users = getAllUsers()
-    return users.find { it.id == id }
+  fun patchUserAtID(userModel: UserModel, id: String) {}
+
+  fun deleteAllUsers() {
+    val list = getAllUsers()
+    list.clear()
+    usersFile.writeText(Json.encodeToString(list))
   }
 
-  fun addUser(userModel: UserModel, id: String): Int {
-    return db.insert(UserEntity) {
-      set(it.id, id)
-      set(it.name, userModel.name)
-      set(it.password, userModel.password)
-    }
+  fun deleteUserAtID(id: String) {
+    val list = getAllUsers()
+    list.removeIf { it.id == id }
+    usersFile.writeText(Json.encodeToString(list))
   }
-
-  fun addUser(userModel: UserModel): Int {
-    return db.insert(UserEntity) {
-      set(it.id, userModel.id)
-      set(it.name, userModel.name)
-      set(it.password, userModel.password)
-    }
-  }
-
-  fun putUserAtID(userModel: UserModel, id: String): Int {
-    var result = db.update(UserEntity) {
-      set(it.name, userModel.name)
-      set(it.password, userModel.password)
-      where { it.id eq id }
-    }
-
-    if (result == 0) {
-      result = addUser(userModel, id)
-    }
-    return result
-  }
-
-  fun patchUserAtID(userModel: UserModel, id: String): Int {
-    return db.update(UserEntity) {
-      set(it.name, userModel.name)
-      set(it.password, userModel.password)
-      where { it.id eq id }
-    }
-  }
-
-  fun deleteAllUsers(): Int = db.deleteAll(UserEntity)
-
-  fun deleteUserAtID(id: String): Int = db.delete(UserEntity) {it.id eq id}
 
   fun generateRandomID(): String {
     val charPool : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')

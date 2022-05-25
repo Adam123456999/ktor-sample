@@ -43,14 +43,7 @@ fun Route.authRouting(db: DatabaseConnection, tokenManager: TokenManager) {
         name = userRequest.name,
         password = userRequest.password
       )
-      val result = db.addUser(userModel)
-
-      if (result == 0) {
-        call.respond(
-          status = HttpStatusCode.InternalServerError,
-          message = EmptyResponse(success = false)
-        )
-      }
+      db.addUser(userModel)
 
       val token = tokenManager.generateJWTToken(userModel)
 

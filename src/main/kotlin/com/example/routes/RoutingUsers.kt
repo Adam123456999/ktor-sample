@@ -52,14 +52,8 @@ fun Route.usersRouting(db: DatabaseConnection) {
         name = userRequest.name,
         password = userRequest.password
       )
-      val result = db.addUser(userModel)
 
-      if (result == 0) {
-        call.respond(
-          status = HttpStatusCode.InternalServerError,
-          message = EmptyResponse(success = false)
-        )
-      }
+      db.addUser(userModel)
 
       val token = TokenManager(HoconApplicationConfig(ConfigFactory.load())).generateJWTToken(userModel)
 
@@ -72,17 +66,10 @@ fun Route.usersRouting(db: DatabaseConnection) {
 
     delete {
       val result = db.deleteAllUsers()
-      if (result == 0) {
-        call.respond(
-          status = HttpStatusCode.InternalServerError,
-          message = EmptyResponse(success = false)
-        )
-      } else {
-        call.respond(
-          status = HttpStatusCode.OK,
-          message = EmptyResponse(success = true)
-        )
-      }
+      call.respond(
+        status = HttpStatusCode.OK,
+        message = EmptyResponse(success = true)
+      )
     }
 
     delete("{id}") {
@@ -92,42 +79,12 @@ fun Route.usersRouting(db: DatabaseConnection) {
           message = EmptyResponse(success = false)
         )
 
-      val result = db.deleteUserAtID(id)
+      db.deleteUserAtID(id)
 
-      if (result == 0) {
-        call.respond(
-          status = HttpStatusCode.NotFound,
-          message = EmptyResponse(success = false)
-        )
-      } else {
-        call.respond(
-          status = HttpStatusCode.OK,
-          message = EmptyResponse(success = true)
-        )
-      }
-    }
-
-    put("{id}") {
-      val userModel = call.receive<UserModel>()
-      val id = call.parameters["id"]
-        ?: return@put call.respond(
-          status = HttpStatusCode.BadRequest,
-          message = EmptyResponse(success = false)
-        )
-
-      val result = db.putUserAtID(userModel, id)
-
-      if (result == 0) {
-        call.respond(
-          status = HttpStatusCode.InternalServerError,
-          message = EmptyResponse(success = false)
-        )
-      } else {
-        call.respond(
-          status = HttpStatusCode.OK,
-          message = EmptyResponse(success = true)
-        )
-      }
+      call.respond(
+        status = HttpStatusCode.OK,
+        message = EmptyResponse(success = true)
+      )
     }
 
     patch("{id}") {
@@ -138,20 +95,12 @@ fun Route.usersRouting(db: DatabaseConnection) {
           message = EmptyResponse(success = false)
         )
 
-      val result = db.patchUserAtID(userModel, id)
-
-      if (result == 0) {
-        call.response.status(HttpStatusCode.NotFound)
-        call.respond(
-          status = HttpStatusCode.NotFound,
-          message = EmptyResponse(success = false)
-        )
-      } else {
-        call.respond(
-          status = HttpStatusCode.OK,
-          message = EmptyResponse(success = true)
-        )
-      }
+      db.patchUserAtID(userModel, id)
+      call.response.status(HttpStatusCode.NotFound)
+      call.respond(
+        status = HttpStatusCode.NotFound,
+        message = EmptyResponse(success = false)
+      )
     }
   }
 }

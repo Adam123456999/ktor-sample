@@ -10,6 +10,7 @@ fun Application.configureHTTP() {
   val port = HoconApplicationConfig(ConfigFactory.load()).property("ktor.deployment.port")
   install(CORS) {
     allowMethod(HttpMethod.Delete)
+    allowMethod(HttpMethod.Patch)
     allowHeader(HttpHeaders.AccessControlAllowHeaders)
     allowHeader(HttpHeaders.ContentType)
     allowHeader(HttpHeaders.AccessControlAllowOrigin)
